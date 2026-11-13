@@ -17,6 +17,12 @@ Call 1: the model lists each claim, translates it to English, quotes the policy 
 Call 2, only after a FAIL: an independent verifier overturns false alarms (misread policy, wrong topic, a reply that is only concise or translated).
 At most 2 calls per reply, temperature 0, no hand-written rules, nothing criterion-specific in the code.
 
+Why it beats the baseline (in short):
+
+The baseline asks for a one-word PASS/FAIL with no reasoning, so it fails many good replies and misses small changes.
+Our judge makes the AI show its reasoning claim by claim, so it can see numbers, conditions and hedges.
+A FAIL must quote the policy sentence it breaks, which stops false alarms on good replies.
+Every FAIL gets a second check, which removes the remaining false alarms.
 Assumptions: the judge sees one reply at a time, never the pair or the edit type. Labels come from how the pairs were built. The policy fits in the prompt.
 
 Models and why
@@ -27,6 +33,13 @@ claude-haiku-4.5	closed	API (hackathon-provided OpenAI-compatible endpoint)	Judg
 Settings: JUDGE_LLM_MAX_TOKENS raised to 900 inside the judge so the model can reason before its verdict; temperature 0.
 
 Results
+What the score means (plain words). Each test case is a good reply and a slightly changed copy of it.
+
+Catch: the judge must FAIL the changed copy when the change is harmful. Higher = fewer missed mistakes.
+Keep: the judge must PASS the changed copy when the change is harmless. Higher = fewer false alarms.
+Combined: the two scores averaged in a way that punishes a judge that is strong on one and weak on the other. A judge that fails everything, or passes everything, scores 0.
+Original pass: the share of good replies the judge passes. This drives catch and keep, so it matters most.
+Baseline: the simple starting judge, scored the same way. Our score is compared against it.
 Metric: combined = harmonic mean of catch (harmful edits caught) and keep (harmless edits left alone), each averaged over edit types. Held-out = 3 of 9 source replies held back and not used as examples (split_holdout.py), so it estimates performance on unseen sources.
 
 Judge 1 (does the reply over-promise?)
@@ -87,7 +100,7 @@ Demo UI (then open http://localhost:8000):
 python demo_server.py
 python demo_server.py --criterion surprise/CRITERION.md --dev surprise/dev_pairs.jsonl
 Demo
-submission/slides.pdf (5 slides: the problem, where we started, what we did, results, how to run it).
+submission/slides.pdf: screenshots of our solution, meaning the running local demo and how we tried to solve the problem.
 
 The local demo (demo.html + demo_server.py) shows the verdict, the claim-by-claim analysis with quoted policy sentences, and the verification step. One way to show the criterion switch: judge the reply "charged at double the daily rate" under both criteria. Judge 1 should pass it (not an over-promise); the surprise criterion should fail it (misstates the policy).
 
