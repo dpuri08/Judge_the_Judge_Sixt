@@ -11,6 +11,24 @@
     .step.done .step-num{border-color:var(--green);background:var(--green-soft);color:var(--green)}
     @media(max-width:900px){.layout{grid-template-columns:1fr}.result-card{position:static}.shell{padding:23px 20px 32px}.topbar{padding:0 20px}}
     @media(max-width:600px){.hero{align-items:flex-start;flex-direction:column}.hero h1{font-size:27px}.workflow{grid-template-columns:1fr}.step+.step{border-left:0;border-top:1px solid var(--line)}.card-head{flex-direction:column;gap:12px}.sample-wrap{width:100%;justify-content:space-between}.sample-select{max-width:none;flex:1;margin-left:8px}.form{padding:16px}.controls{align-items:stretch;flex-direction:column-reverse}.btn-primary{width:100%}.top-meta .status-text{display:none}.brand-sub{font-size:9px}.shell{padding-left:13px;padding-right:13px}}
+    .scorecard{padding:18px 21px;margin-bottom:20px}
+    .sc-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:14px}
+    .tile{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fafaf8}
+    .tile-k{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#6b6b68;font-weight:800}
+    .tile-v{font-size:26px;font-weight:900;color:var(--green);letter-spacing:-.03em;margin:4px 0}
+    .tile-s{font-size:11px;color:#858683;line-height:1.4}
+    .call-break{display:none;border-top:1px solid #efefed;padding:15px 19px 4px}
+    .call-head{font-size:11px;text-transform:uppercase;letter-spacing:.12em;font-weight:850;color:#5a5b58;margin-bottom:9px}
+    .call-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .call-card{border:1px solid var(--line);border-radius:10px;padding:9px;background:#fff;text-align:center}
+    .call-label{font-size:10px;color:#777;margin-bottom:6px}
+    .pill{display:inline-block;border-radius:999px;padding:4px 10px;font-size:11px;font-weight:800;background:#f0f0ed;color:#6a6b68}
+    .pill.pass{background:var(--green-soft);color:var(--green)}
+    .pill.fail{background:var(--red-soft);color:var(--red)}
+    .label-counts{font-size:11px;color:#555654;margin-top:10px}
+    .call-note{font-size:12px;font-weight:700;color:#292a29;margin:8px 0 12px}
+    @media(max-width:900px){.sc-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:600px){.sc-grid{grid-template-columns:1fr}.call-grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -23,6 +41,18 @@
     <section class="hero">
       <div><div class="eyebrow">AI quality assurance · single reply review</div><h1>Judge the Judge</h1><p>Check one customer reply against policy. See the verdict and the evidence behind it.</p></div>
       <div class="model-pill">Judge model <b id="modelName">claude-haiku-4.5</b></div>
+    </section>
+    <section class="card scorecard" aria-label="Our scores">
+        <div class="card-title">Our scores</div>
+        <div class="card-caption">Combined score: 0 = useless, 1 = perfect. The starting judge (baseline) is shown for comparison.</div>
+        <div class="sc-grid">
+          <div class="tile"><div class="tile-k">Rule 1 · over-promise</div><div class="tile-v">0.908</div><div class="tile-s">baseline 0.697 · unseen replies 0.906</div></div>
+          <div class="tile"><div class="tile-k">Surprise · facts correct</div><div class="tile-v">0.917</div><div class="tile-s">baseline 0.652 · unseen replies 0.933</div></div>
+          <div class="tile"><div class="tile-k">Harmful edits caught</div><div class="tile-v">86%</div><div class="tile-s">rule 1, full dev set</div></div>
+          <div class="tile"><div class="tile-k">Harmless edits kept</div><div class="tile-v">96%</div><div class="tile-s">rule 1, full dev set</div></div>
+          <div class="tile"><div class="tile-k">Same answer twice</div><div class="tile-v">100%</div><div class="tile-s">152 of 152 replies</div></div>
+        </div>
+      </section>
     </section>
     <section class="workflow" aria-label="Review workflow">
       <div class="step active" id="step1"><span class="step-num">1</span><div><div class="step-name">Add a reply</div><div class="step-desc">Question, language, and response</div></div></div>
@@ -44,7 +74,7 @@
           <div class="verdict" id="verdictBox"><div class="verdict-word" id="verdictWord">—</div><div class="verdict-note" id="verdictNote">Add a question and reply, then run the policy check.</div></div>
           <div class="result-meta"><span class="chip">Criterion-based</span><span class="chip">Policy-grounded</span><span class="chip">Single reply</span></div>
           <div class="error-box" id="errorBox"></div>
-          <div class="evidence"><div class="evidence-head"><div class="evidence-title">Decision evidence</div><div class="call-count" id="callCount">No model calls yet</div></div><div class="evidence-empty" id="evidenceEmpty">After evaluation, the analysis and any verification step appear here. Look for a claim, its matching policy rule, and the reason it passed or failed.</div><div class="analysis" id="analysis"></div><div class="why" id="verifyTitle" hidden>Independent verification</div><div class="analysis" id="verification"></div></div>
+          <div class="call-break" id="callBreak"></div><div class="evidence"><div class="evidence-head"><div class="evidence-title">Decision evidence</div><div class="call-count" id="callCount">No model calls yet</div></div><div class="evidence-empty" id="evidenceEmpty">After evaluation, the analysis and any verification step appear here. Look for a claim, its matching policy rule, and the reason it passed or failed.</div><div class="analysis" id="analysis"></div><div class="why" id="verifyTitle" hidden>Independent verification</div><div class="analysis" id="verification"></div></div>
         </section>
         <details class="card rubric" id="rubricDetails"><summary>Criterion & policy inputs</summary><div class="rubric-content"><div><label for="criterion">Criterion</label><textarea class="input" id="criterion"></textarea></div><div><label for="policy">Company policy</label><textarea class="input" id="policy"></textarea></div><div class="small-note">These inputs are loaded from the starter pack. You can edit them for a quick rubric experiment; nothing is saved.</div></div></details>
       </aside>
@@ -63,10 +93,26 @@
     function setStep(n){[1,2,3].forEach(i=>{$(`step${i}`).classList.toggle('active',i===n);$(`step${i}`).classList.toggle('done',i<n)})}
     $('sampleSelect').addEventListener('change',e=>{setSample(e.target.value);e.target.value=''});
     async function loadConfig(){try{const r=await fetch('/api/config');if(!r.ok)throw new Error('config');const c=await r.json();$('modelName').textContent=c.model;$('endpointStatus').textContent=c.ready?'LLM endpoint configured':'LLM endpoint setup needed';if(!c.ready)$('statusDot').style.background='#e3a126';$('criterion').value=c.criterion;$('policy').value=c.policy}catch(_){$('modelName').textContent='offline';$('endpointStatus').textContent='Start local demo server';$('statusDot').style.background='#c63c32'}}
-    function resetResult(){ $('errorBox').style.display='none';$('analysis').textContent='';$('verification').textContent='';$('verifyTitle').hidden=true;$('evidenceEmpty').style.display='none'; }
+    function lastVerdict(t){const m=[...(t||'').matchAll(/VERDICT\s*[:\-]?\s*\**\s*(PASS|FAIL)/gi)];return m.length?m[m.length-1][1].toUpperCase():null}
+    function countLabel(t,l){return ((t||'').match(new RegExp('\\b'+l+'\\b','g'))||[]).length}
+    function renderCalls(d){
+      const c1=lastVerdict(d.analysis), c2=d.verification?lastVerdict(d.verification):null;
+      const L={sup:countLabel(d.analysis,'SUPPORTED'),less:countLabel(d.analysis,'LESS_GENEROUS'),nc:countLabel(d.analysis,'NOT_COVERED'),vio:countLabel(d.analysis,'VIOLATION')};
+      const pill=(v,label)=>`<div class="call-card"><div class="call-label">${label}</div><span class="pill ${v==='PASS'?'pass':v==='FAIL'?'fail':''}">${v||'no verdict'}</span></div>`;
+      const c2card=c2?pill(c2,'Call 2 · verification'):`<div class="call-card"><div class="call-label">Call 2 · verification</div><span class="pill">not needed</span></div>`;
+      let note;
+      if(c2) note = (c1==='FAIL' && c2==='PASS') ? 'Call 2 overturned the FAIL, so the final verdict is PASS.' : (c2==='FAIL' ? 'Call 2 confirmed the FAIL.' : 'Call 2 agreed with a PASS.');
+      else note = c1==='PASS' ? 'Call 1 passed the reply, so no second check was needed.' : 'Call 1 said FAIL but no second check was returned.';
+      $('callBreak').innerHTML = `<div class="call-head">Score by call</div>
+        <div class="call-grid">${pill(c1,'Call 1 · analysis')}${c2card}${pill(d.verdict.toUpperCase(),'Final verdict')}</div>
+        <div class="label-counts">Labels in call 1: supported ${L.sup} · less generous ${L.less} · not covered ${L.nc} · violation ${L.vio}</div>
+        <div class="call-note">${note}</div>`;
+      $('callBreak').style.display='block';
+    }
+    function resetResult(){ $('callBreak').style.display='none';$('errorBox').style.display='none';$('analysis').textContent='';$('verification').textContent='';$('verifyTitle').hidden=true;$('evidenceEmpty').style.display='none'; }
     $('judgeForm').addEventListener('submit',async e=>{
       e.preventDefault();const btn=$('submitBtn');if(btn.disabled)return;setStep(2);resetResult();btn.disabled=true;btn.innerHTML='<span>Checking policy…</span><span class="arrow">···</span>';$('stateTag').textContent='RUNNING';$('resultTitle').textContent='Review in progress';$('verdictBox').className='verdict loading';$('verdictWord').textContent='…';$('verdictNote').textContent='Comparing claims, conditions, and quantities with the policy.';
-      try{const response=await fetch('/api/judge',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:$('question').value,reply:$('reply').value,lang:$('lang').value,criterion:$('criterion').value,policy:$('policy').value})});const data=await response.json();if(!response.ok)throw new Error(data.error||'The judge request failed.');const pass=data.verdict==='pass';setStep(3);$('stateTag').textContent='COMPLETE';$('resultTitle').textContent=pass?'Reply aligns with policy':'Potential policy violation';$('verdictBox').className='verdict '+(pass?'pass':'fail');$('verdictWord').textContent=pass?'PASS':'FAIL';$('verdictNote').textContent=pass?'No criterion violation was found in the reply.':'The judge found a claim that may exceed or conflict with policy.';$('callCount').textContent=`${data.calls} LLM call${data.calls===1?'':'s'} · ${data.model}`;$('analysis').textContent=data.analysis||'No analysis text was returned.';if(data.verification){$('verifyTitle').hidden=false;$('verification').textContent=data.verification}}
+      try{const response=await fetch('/api/judge',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:$('question').value,reply:$('reply').value,lang:$('lang').value,criterion:$('criterion').value,policy:$('policy').value})});const data=await response.json();if(!response.ok)throw new Error(data.error||'The judge request failed.');const pass=data.verdict==='pass';setStep(3);$('stateTag').textContent='COMPLETE';$('resultTitle').textContent=pass?'Reply aligns with policy':'Potential policy violation';$('verdictBox').className='verdict '+(pass?'pass':'fail');$('verdictWord').textContent=pass?'PASS':'FAIL';$('verdictNote').textContent=pass?'No criterion violation was found in the reply.':'The judge found a claim that may exceed or conflict with policy.';$('callCount').textContent=`${data.calls} LLM call${data.calls===1?'':'s'} · ${data.model}`;$('analysis').textContent=data.analysis||'No analysis text was returned.';if(data.verification){$('verifyTitle').hidden=false;$('verification').textContent=data.verification}renderCalls(data)}
       catch(err){$('stateTag').textContent='ERROR';$('resultTitle').textContent='Could not complete review';$('verdictBox').className='verdict';$('verdictWord').textContent='—';$('verdictNote').textContent='Check the local server, endpoint settings, and try again.';$('errorBox').textContent=err.message;$('errorBox').style.display='block';$('evidenceEmpty').style.display='block'}
       finally{btn.disabled=false;btn.innerHTML='<span>Evaluate reply</span><span class="arrow">→</span>'}
     });
